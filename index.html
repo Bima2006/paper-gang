@@ -288,6 +288,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        // පාස්වර්ඩ් එක මෙතැනින් වෙනස් කළ හැකිය
         const ADMIN_PWD = "4444";
 
         let currentCategory = "";
@@ -400,6 +401,7 @@
 
                 snap.forEach(doc => {
                     const a = doc.data();
+                    const id = doc.id;
                     text += ` &bull; ${a.text} `;
                     adminList.innerHTML += `
                         <div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl">
