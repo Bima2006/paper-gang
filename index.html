@@ -89,6 +89,27 @@
             gap: 10px;
             z-index: 40;
         }
+
+        /* --- MOBILE SIDEBAR ANIMATION --- */
+        #sidebar-overlay {
+            transition: opacity 0.3s ease;
+        }
+        #main-sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @media (max-width: 1024px) {
+            #main-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                z-index: 150;
+                transform: translateX(-100%);
+            }
+            #main-sidebar.open {
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body class="light-theme">
@@ -97,7 +118,8 @@
         Synchronizing Cloud Database...
     </div>
 
-    <!-- Announcement Bar -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[140] hidden lg:hidden"></div>
+
     <div id="announcement-bar" class="h-8 bg-slate-900 text-white flex items-center overflow-hidden relative z-[60]">
         <div id="announcement-content" class="animate-marquee font-bold text-xs uppercase tracking-widest px-4">
             Welcome to Paper Gang Pro! Stay tuned for the latest papers and updates.
@@ -105,43 +127,49 @@
     </div>
 
     <div class="flex flex-col h-screen overflow-hidden">
-        <header class="h-20 glass-nav flex items-center justify-between px-8 z-50">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/20 rotate-3">
-                    <i class="fas fa-bolt-lightning text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-black tracking-tight leading-none">Paper <span class="gradient-text">Gang Pro</span></h1>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">BHAWATHRA Premium Ecosystem</p>
+        <header class="h-20 glass-nav flex items-center justify-between px-4 lg:px-8 z-50">
+            <div class="flex items-center gap-3 lg:gap-4">
+                <button onclick="toggleSidebar()" class="lg:hidden w-10 h-10 flex items-center justify-center text-slate-500 text-xl">
+                    <i class="fas fa-bars-staggered"></i>
+                </button>
+                
+                <div onclick="toggleSidebar()" class="cursor-pointer flex items-center gap-3 lg:gap-4">
+                    <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/20 rotate-3">
+                        <i class="fas fa-bolt-lightning text-lg lg:text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl lg:text-2xl font-black tracking-tight leading-none">Paper <span class="gradient-text">Gang Pro</span></h1>
+                        <p class="hidden sm:block text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">BHAWATHRA Premium Ecosystem</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 lg:gap-4">
                 <div class="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl">
-                    <button onclick="setTheme('light')" id="lightBtn" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all bg-white shadow-sm text-amber-500">
-                        <i class="fas fa-sun"></i>
+                    <button onclick="setTheme('light')" id="lightBtn" class="w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center transition-all bg-white shadow-sm text-amber-500">
+                        <i class="fas fa-sun text-sm"></i>
                     </button>
-                    <button onclick="setTheme('dark')" id="darkBtn" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all text-slate-400">
-                        <i class="fas fa-moon"></i>
+                    <button onclick="setTheme('dark')" id="darkBtn" class="w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center transition-all text-slate-400">
+                        <i class="fas fa-moon text-sm"></i>
                     </button>
                 </div>
-                <div class="h-8 w-[2px] bg-slate-200 dark:bg-slate-800 mx-2"></div>
-                <button onclick="openAdmin()" class="gradient-btn text-white px-6 py-2.5 rounded-2xl text-sm font-black shadow-xl uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-shield-halved"></i> Admin
+                <div class="h-8 w-[2px] bg-slate-200 dark:bg-slate-800 mx-1 lg:mx-2"></div>
+                <button onclick="openAdmin()" class="gradient-btn text-white px-4 lg:px-6 py-2.5 rounded-2xl text-[10px] lg:text-sm font-black shadow-xl uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-shield-halved"></i> <span class="hidden sm:inline">Admin</span>
                 </button>
             </div>
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <!-- Sidebar -->
-            <aside class="w-80 sidebar-bg hidden lg:flex flex-col p-8 overflow-y-auto">
+            <aside id="main-sidebar" class="w-80 sidebar-bg flex flex-col p-8 overflow-y-auto">
+                <button onclick="toggleSidebar()" class="lg:hidden self-end mb-6 text-slate-400 text-2xl">&times;</button>
+
                 <div class="mb-10">
                     <h3 class="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-violet-500"></span> Knowledge Folders
                     </h3>
                     <nav id="subjectList" class="space-y-1">
-                        <!-- Subjects will be loaded here -->
-                    </nav>
+                        </nav>
                 </div>
 
                 <div class="mb-10">
@@ -149,8 +177,7 @@
                         <span class="w-2 h-2 rounded-full bg-pink-500"></span> EDU LINKS
                     </h3>
                     <div id="eduLinksList" class="space-y-2">
-                        <!-- Edu Links will be injected -->
-                    </div>
+                        </div>
                 </div>
 
                 <div class="mt-auto">
@@ -161,9 +188,7 @@
                 </div>
             </aside>
 
-            <!-- Main Content Area -->
             <main class="flex-1 flex flex-col bg-transparent overflow-hidden">
-                <!-- Navigation Tabs -->
                 <div class="px-8 pt-6 flex items-center gap-6 border-b border-slate-100 dark:border-slate-900 overflow-x-auto no-scrollbar">
                     <button id="tab-home" onclick="showLibrary()" class="px-4 py-4 text-sm whitespace-nowrap tab-btn tab-active flex items-center gap-2">
                         <i class="fas fa-shapes"></i> Main Library
@@ -171,25 +196,22 @@
                     <div id="activeTabs" class="flex gap-2"></div>
                 </div>
 
-                <div id="mainDisplay" class="flex-1 p-8 overflow-y-auto">
-                    <!-- Library Grid -->
-                    <div id="libraryView" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                        <!-- PDF Cards will be injected -->
-                    </div>
+                <div id="mainDisplay" class="flex-1 p-4 lg:p-8 overflow-y-auto">
+                    <div id="libraryView" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
+                        </div>
                     
-                    <!-- Reader Overlay -->
                     <div id="readerView" class="hidden h-full">
-                        <div class="bg-white dark:bg-slate-900 p-2 rounded-[2.5rem] shadow-2xl h-full border-4 border-violet-500/20 relative">
+                        <div class="bg-white dark:bg-slate-900 p-1 lg:p-2 rounded-[1.5rem] lg:rounded-[2.5rem] shadow-2xl h-full border-2 lg:border-4 border-violet-500/20 relative">
                             <div class="iframe-container">
                                 <iframe id="pdfFrame" src=""></iframe>
                                 <div class="zoom-controls">
-                                    <button onclick="zoomPdf(0.1)" class="w-12 h-12 rounded-full bg-white shadow-xl text-violet-600 flex items-center justify-center hover:scale-110 transition-transform">
+                                    <button onclick="zoomPdf(0.1)" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-violet-600 flex items-center justify-center hover:scale-110 transition-transform">
                                         <i class="fas fa-magnifying-glass-plus"></i>
                                     </button>
-                                    <button onclick="zoomPdf(-0.1)" class="w-12 h-12 rounded-full bg-white shadow-xl text-pink-600 flex items-center justify-center hover:scale-110 transition-transform">
+                                    <button onclick="zoomPdf(-0.1)" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-pink-600 flex items-center justify-center hover:scale-110 transition-transform">
                                         <i class="fas fa-magnifying-glass-minus"></i>
                                     </button>
-                                    <button onclick="resetZoom()" class="w-12 h-12 rounded-full bg-white shadow-xl text-slate-600 flex items-center justify-center hover:scale-110 transition-transform">
+                                    <button onclick="resetZoom()" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-slate-600 flex items-center justify-center hover:scale-110 transition-transform">
                                         <i class="fas fa-arrows-rotate"></i>
                                     </button>
                                 </div>
@@ -200,9 +222,9 @@
             </main>
         </div>
 
-        <footer class="h-10 glass-nav border-t flex items-center justify-between px-8 text-[9px] text-slate-400 uppercase tracking-[0.3em] font-bold">
+        <footer class="h-10 glass-nav border-t flex items-center justify-between px-4 lg:px-8 text-[7px] lg:text-[9px] text-slate-400 uppercase tracking-[0.2em] lg:tracking-[0.3em] font-bold">
             <div>SECURE CORE: <span class="text-green-500 animate-pulse">ACTIVE</span></div>
-            <div>BiMaA &bull; BHAWATHRA STUDIO</div>
+            <div class="hidden xs:block">BiMaA &bull; BHAWATHRA STUDIO</div>
             <div>&copy; 2024 V4.0 PRO PLUS</div>
         </footer>
     </div>
@@ -219,14 +241,13 @@
                 <button onclick="closeAdmin()" class="text-3xl font-light hover:rotate-90 transition-transform">&times;</button>
             </div>
 
-            <div id="adminLogin" class="p-12 text-center">
+            <div id="adminLogin" class="p-8 lg:p-12 text-center">
                 <p class="text-slate-500 mb-8 font-bold uppercase tracking-widest text-xs">Verify Credentials</p>
-                <input type="password" id="adminKey" placeholder="••••" class="w-full text-center text-5xl tracking-[0.5em] p-6 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border-none outline-none mb-8">
+                <input type="password" id="adminKey" placeholder="••••" class="w-full text-center text-3xl lg:text-5xl tracking-[0.5em] p-6 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border-none outline-none mb-8">
                 <button onclick="authAdmin()" class="w-full gradient-btn text-white py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-lg">Access Database</button>
             </div>
 
-            <div id="adminConsole" class="hidden p-8 space-y-6 overflow-y-auto">
-                <!-- Subjects Management -->
+            <div id="adminConsole" class="hidden p-6 lg:p-8 space-y-6 overflow-y-auto">
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
                     <label class="text-[10px] font-black text-violet-500 uppercase mb-4 block">Categories / Subjects</label>
                     <div class="flex gap-3 mb-4">
@@ -235,8 +256,6 @@
                     </div>
                     <div id="adminSubjectList" class="flex flex-wrap gap-2"></div>
                 </div>
-                
-                <!-- PDF Upload -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
                     <label class="text-[10px] font-black text-pink-500 uppercase mb-4 block">Store New Paper</label>
                     <div class="space-y-3">
@@ -246,13 +265,11 @@
                         <button onclick="savePDF()" class="w-full gradient-btn text-white py-4 rounded-2xl font-black uppercase tracking-widest">Store in Cloud</button>
                     </div>
                 </div>
-
-                <!-- EDU LINKS Management -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
-                    <label class="text-[10px] font-black text-cyan-500 uppercase mb-4 block">EDU LINKS (Links, Videos, Telegram)</label>
+                    <label class="text-[10px] font-black text-cyan-500 uppercase mb-4 block">EDU LINKS</label>
                     <div class="space-y-3">
                         <input type="text" id="linkName" placeholder="Display Text" class="w-full p-4 rounded-2xl dark:bg-slate-800 outline-none">
-                        <input type="text" id="linkUrl" placeholder="URL / Message Link" class="w-full p-4 rounded-2xl dark:bg-slate-800 outline-none">
+                        <input type="text" id="linkUrl" placeholder="URL" class="w-full p-4 rounded-2xl dark:bg-slate-800 outline-none">
                         <select id="linkType" class="w-full p-4 rounded-2xl dark:bg-slate-800 outline-none">
                             <option value="link">Quick Link</option>
                             <option value="telegram">Telegram Message</option>
@@ -262,10 +279,8 @@
                     </div>
                     <div id="adminLinksList" class="mt-4 space-y-2"></div>
                 </div>
-
-                <!-- Announcements Management -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
-                    <label class="text-[10px] font-black text-amber-500 uppercase mb-4 block">Broadcast Announcement</label>
+                    <label class="text-[10px] font-black text-amber-500 uppercase mb-4 block">Broadcast</label>
                     <div class="flex gap-3 mb-4">
                         <input type="text" id="announcementInput" placeholder="Enter message..." class="flex-1 p-4 rounded-2xl dark:bg-slate-800 outline-none">
                         <button onclick="saveAnnouncement()" class="bg-amber-500 text-white px-6 rounded-2xl font-black uppercase tracking-widest">Post</button>
@@ -288,12 +303,19 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        // පාස්වර්ඩ් එක මෙතැනින් වෙනස් කළ හැකිය
         const ADMIN_PWD = "4444";
 
         let currentCategory = "";
         let openTabs = [];
         let currentZoom = 1;
+
+        // --- SIDEBAR TOGGLE ---
+        function toggleSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        }
 
         // --- THEME ENGINE ---
         function setTheme(theme) {
@@ -303,17 +325,16 @@
 
             if(theme === 'dark') {
                 body.className = 'dark-theme';
-                dBtn.className = 'w-10 h-10 rounded-xl flex items-center justify-center bg-slate-800 shadow-lg text-white';
-                lBtn.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-slate-400';
+                dBtn.className = 'w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center bg-slate-800 shadow-lg text-white';
+                lBtn.className = 'w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center text-slate-400';
             } else {
                 body.className = 'light-theme';
-                lBtn.className = 'w-10 h-10 rounded-xl flex items-center justify-center bg-white shadow-lg text-amber-500';
-                dBtn.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-slate-400';
+                lBtn.className = 'w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center bg-white shadow-lg text-amber-500';
+                dBtn.className = 'w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center text-slate-400';
             }
             localStorage.setItem('pg_ultimate_theme', theme);
         }
 
-        // --- PDF ZOOM CONTROLS ---
         function zoomPdf(amt) {
             currentZoom += amt;
             if(currentZoom < 0.5) currentZoom = 0.5;
@@ -326,88 +347,49 @@
             document.getElementById('pdfFrame').style.transform = `scale(1)`;
         }
 
-        // --- CORE INITIALIZATION ---
         function initApp() {
             document.getElementById('status-bar').classList.remove('hidden');
             
-            // Subjects Listener
             db.collection("subjects").orderBy("name").onSnapshot(snap => {
                 const list = document.getElementById('subjectList');
                 const select = document.getElementById('subSelect');
                 const adminList = document.getElementById('adminSubjectList');
-                
-                list.innerHTML = "";
-                select.innerHTML = "";
-                adminList.innerHTML = "";
-                
+                list.innerHTML = ""; select.innerHTML = ""; adminList.innerHTML = "";
                 let first = true;
                 snap.forEach(doc => {
-                    const s = doc.data().name;
-                    const id = doc.id;
-                    
+                    const s = doc.data().name; const id = doc.id;
                     if(first && !currentCategory) { currentCategory = s; first = false; }
-                    
-                    list.innerHTML += `
-                        <button onclick="filter('${s}')" class="sidebar-item w-full text-left p-4 flex items-center justify-between ${currentCategory === s ? 'active' : 'text-slate-500'}">
-                            <span class="text-sm font-bold"><i class="fas fa-folder-closed mr-3 opacity-40"></i>${s}</span>
-                        </button>`;
-                    
+                    list.innerHTML += `<button onclick="filter('${s}')" class="sidebar-item w-full text-left p-4 flex items-center justify-between ${currentCategory === s ? 'active' : 'text-slate-500'}"><span class="text-sm font-bold"><i class="fas fa-folder-closed mr-3 opacity-40"></i>${s}</span></button>`;
                     select.innerHTML += `<option value="${s}">${s}</option>`;
-                    
-                    adminList.innerHTML += `
-                        <div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-xs">
-                            ${s} <button onclick="deleteItem('subjects', '${id}')" class="text-red-500 ml-2"><i class="fas fa-times"></i></button>
-                        </div>`;
+                    adminList.innerHTML += `<div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-xs">${s} <button onclick="deleteItem('subjects', '${id}')" class="text-red-500 ml-2"><i class="fas fa-times"></i></button></div>`;
                 });
-                
                 filter(currentCategory);
                 document.getElementById('status-bar').classList.add('hidden');
             });
 
-            // Edu Links Listener
             db.collection("edu_links").orderBy("date", "desc").onSnapshot(snap => {
                 const list = document.getElementById('eduLinksList');
                 const adminList = document.getElementById('adminLinksList');
-                list.innerHTML = "";
-                adminList.innerHTML = "";
-
+                list.innerHTML = ""; adminList.innerHTML = "";
                 snap.forEach(doc => {
-                    const l = doc.data();
-                    const id = doc.id;
-                    let icon = "fa-link";
-                    let color = "text-violet-500";
+                    const l = doc.data(); const id = doc.id;
+                    let icon = "fa-link"; let color = "text-violet-500";
                     if(l.type === 'telegram') { icon = "fa-paper-plane"; color = "text-sky-500"; }
                     if(l.type === 'video') { icon = "fa-circle-play"; color = "text-rose-500"; }
-
-                    list.innerHTML += `
-                        <a href="${l.url}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-500/10 transition-all text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white">
-                            <i class="fas ${icon} ${color} text-[14px]"></i> ${l.name}
-                        </a>`;
-
-                    adminList.innerHTML += `
-                        <div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <div class="text-xs font-bold"><i class="fas ${icon} mr-2"></i> ${l.name}</div>
-                            <button onclick="deleteItem('edu_links', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button>
-                        </div>`;
+                    list.innerHTML += `<a href="${l.url}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-500/10 transition-all text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white"><i class="fas ${icon} ${color} text-[14px]"></i> ${l.name}</a>`;
+                    adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700"><div class="text-xs font-bold"><i class="fas ${icon} mr-2"></i> ${l.name}</div><button onclick="deleteItem('edu_links', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
                 });
             });
 
-            // Announcements Listener
             db.collection("announcements").orderBy("date", "desc").onSnapshot(snap => {
                 const bar = document.getElementById('announcement-content');
                 const adminList = document.getElementById('adminAnnouncementList');
                 let text = "Welcome to Paper Gang Pro! Stay focused and keep studying. ";
                 adminList.innerHTML = "";
-
                 snap.forEach(doc => {
-                    const a = doc.data();
-                    const id = doc.id;
+                    const a = doc.data(); const id = doc.id;
                     text += ` &bull; ${a.text} `;
-                    adminList.innerHTML += `
-                        <div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl">
-                            <div class="text-xs font-medium">${a.text}</div>
-                            <button onclick="deleteItem('announcements', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button>
-                        </div>`;
+                    adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl"><div class="text-xs font-medium">${a.text}</div><button onclick="deleteItem('announcements', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
                 });
                 bar.innerHTML = text;
             });
@@ -420,48 +402,34 @@
                 const container = document.getElementById('libraryView');
                 container.innerHTML = "";
                 snap.forEach(doc => {
-                    const p = doc.data();
-                    const id = doc.id;
+                    const p = doc.data(); const id = doc.id;
                     if(p.category === currentCategory) {
                         container.innerHTML += `
-                            <div class="premium-card p-8 relative animate-pop">
+                            <div class="premium-card p-6 lg:p-8 relative animate-pop">
                                 <div class="flex flex-col h-full cursor-pointer" onclick="openTab('${p.title}', '${p.link}')">
-                                    <div class="w-14 h-14 bg-gradient-to-tr from-violet-100 to-pink-50 dark:from-violet-900 dark:to-pink-900 text-violet-600 dark:text-violet-300 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                                    <div class="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-tr from-violet-100 to-pink-50 dark:from-violet-900 dark:to-pink-900 text-violet-600 dark:text-violet-300 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
                                         <i class="fas fa-file-pdf text-xl"></i>
                                     </div>
-                                    <h4 class="font-extrabold text-xl leading-tight mb-2">${p.title}</h4>
-                                    <div class="flex items-center gap-2 mt-auto">
-                                        <span class="px-3 py-1 rounded-full bg-violet-500/10 text-[9px] font-black text-violet-500 uppercase tracking-widest">${p.category}</span>
-                                    </div>
+                                    <h4 class="font-extrabold text-lg lg:text-xl leading-tight mb-2">${p.title}</h4>
+                                    <div class="flex items-center gap-2 mt-auto"><span class="px-3 py-1 rounded-full bg-violet-500/10 text-[9px] font-black text-violet-500 uppercase tracking-widest">${p.category}</span></div>
                                 </div>
-                                <button onclick="event.stopPropagation(); deleteItem('pdfs', '${id}')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 transition-colors">
-                                    <i class="fas fa-trash-can"></i>
-                                </button>
+                                <button onclick="event.stopPropagation(); deleteItem('pdfs', '${id}')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 transition-colors"><i class="fas fa-trash-can"></i></button>
                             </div>`;
                     }
                 });
-                if(container.innerHTML === "") {
-                    container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold italic">No papers available in this category yet.</div>`;
-                }
+                if(container.innerHTML === "") container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold italic">No papers available yet.</div>`;
             });
         }
 
         function filter(cat) { 
-            currentCategory = cat; 
-            showLibrary(); 
-            loadPapers();
-            document.querySelectorAll('.sidebar-item').forEach(el => {
-                el.classList.remove('active');
-                if(el.innerText.includes(cat)) el.classList.add('active');
-            });
+            currentCategory = cat; showLibrary(); loadPapers();
+            if(window.innerWidth < 1024) toggleSidebar(); // Close sidebar on mobile after selection
+            document.querySelectorAll('.sidebar-item').forEach(el => { el.classList.remove('active'); if(el.innerText.includes(cat)) el.classList.add('active'); });
         }
 
-        // --- UI & TAB CONTROLS ---
         function openTab(title, link) {
             const cleanUrl = link.includes("view") ? link.replace("/view", "/preview") : link;
-            if(!openTabs.find(t => t.link === cleanUrl)) {
-                openTabs.push({title, link: cleanUrl});
-            }
+            if(!openTabs.find(t => t.link === cleanUrl)) openTabs.push({title, link: cleanUrl});
             switchTab(cleanUrl);
         }
 
@@ -470,11 +438,7 @@
             container.innerHTML = "";
             openTabs.forEach(t => {
                 const isActive = document.getElementById('pdfFrame').src === t.link;
-                container.innerHTML += `
-                    <div class="flex items-center gap-3 px-6 py-4 text-sm whitespace-nowrap tab-btn ${isActive ? 'tab-active' : 'text-slate-400'}">
-                        <button onclick="switchTab('${t.link}')" class="font-bold">${t.title}</button>
-                        <button onclick="closeTab('${t.link}')" class="text-lg hover:text-red-500">&times;</button>
-                    </div>`;
+                container.innerHTML += `<div class="flex items-center gap-3 px-6 py-4 text-sm whitespace-nowrap tab-btn ${isActive ? 'tab-active' : 'text-slate-400'}"><button onclick="switchTab('${t.link}')" class="font-bold">${t.title}</button><button onclick="closeTab('${t.link}')" class="text-lg hover:text-red-500">&times;</button></div>`;
             });
         }
 
@@ -482,119 +446,54 @@
             document.getElementById('tab-home').classList.remove('tab-active');
             document.getElementById('libraryView').classList.add('hidden');
             document.getElementById('readerView').classList.remove('hidden');
-            document.getElementById('pdfFrame').src = url;
-            resetZoom();
-            renderTabs();
+            document.getElementById('pdfFrame').src = url; resetZoom(); renderTabs();
         }
 
         function showLibrary() {
             document.getElementById('tab-home').classList.add('tab-active');
             document.getElementById('libraryView').classList.remove('hidden');
             document.getElementById('readerView').classList.add('hidden');
-            document.getElementById('pdfFrame').src = "";
-            renderTabs();
+            document.getElementById('pdfFrame').src = ""; renderTabs();
         }
 
         function closeTab(url) {
             openTabs = openTabs.filter(t => t.link !== url);
-            if(openTabs.length > 0) switchTab(openTabs[openTabs.length - 1].link);
-            else showLibrary();
+            if(openTabs.length > 0) switchTab(openTabs[openTabs.length - 1].link); else showLibrary();
         }
 
-        // --- DATABASE ACTIONS ---
         function openAdmin() { document.getElementById('adminOverlay').style.display = 'flex'; }
         function closeAdmin() { document.getElementById('adminOverlay').style.display = 'none'; }
-        
-        function authAdmin() {
-            if(document.getElementById('adminKey').value === ADMIN_PWD) {
-                document.getElementById('adminLogin').classList.add('hidden');
-                document.getElementById('adminConsole').classList.remove('hidden');
-            } else {
-                showToast("Invalid Key");
-            }
-        }
+        function authAdmin() { if(document.getElementById('adminKey').value === ADMIN_PWD) { document.getElementById('adminLogin').classList.add('hidden'); document.getElementById('adminConsole').classList.remove('hidden'); } else showToast("Invalid Key"); }
 
-        async function saveSubject() {
-            const name = document.getElementById('subInput').value;
-            if(name) { 
-                await db.collection("subjects").add({name}); 
-                document.getElementById('subInput').value = ""; 
-                showToast("Subject Added"); 
-            }
-        }
-
+        async function saveSubject() { const n = document.getElementById('subInput').value; if(n) { await db.collection("subjects").add({name: n}); document.getElementById('subInput').value = ""; showToast("Subject Added"); } }
         async function savePDF() {
-            const title = document.getElementById('pdfName').value;
-            const link = document.getElementById('pdfLink').value;
-            const category = document.getElementById('subSelect').value;
-            if(title && link && category) {
-                await db.collection("pdfs").add({title, link, category, date: new Date()});
-                showToast("PDF Stored Successfully");
-                document.getElementById('pdfName').value = "";
-                document.getElementById('pdfLink').value = "";
-            }
+            const t = document.getElementById('pdfName').value; const l = document.getElementById('pdfLink').value; const c = document.getElementById('subSelect').value;
+            if(t && l && c) { await db.collection("pdfs").add({title: t, link: l, category: c, date: new Date()}); showToast("PDF Stored"); document.getElementById('pdfName').value = ""; document.getElementById('pdfLink').value = ""; }
         }
-
         async function saveEduLink() {
-            const name = document.getElementById('linkName').value;
-            const url = document.getElementById('linkUrl').value;
-            const type = document.getElementById('linkType').value;
-            if(name && url) {
-                await db.collection("edu_links").add({name, url, type, date: new Date()});
-                showToast("Edu Link Added");
-                document.getElementById('linkName').value = "";
-                document.getElementById('linkUrl').value = "";
-            }
+            const n = document.getElementById('linkName').value; const u = document.getElementById('linkUrl').value; const t = document.getElementById('linkType').value;
+            if(n && u) { await db.collection("edu_links").add({name: n, url: u, type: t, date: new Date()}); showToast("Link Added"); document.getElementById('linkName').value = ""; document.getElementById('linkUrl').value = ""; }
         }
-
-        async function saveAnnouncement() {
-            const text = document.getElementById('announcementInput').value;
-            if(text) {
-                await db.collection("announcements").add({text, date: new Date()});
-                showToast("Broadcasting...");
-                document.getElementById('announcementInput').value = "";
-            }
-        }
+        async function saveAnnouncement() { const t = document.getElementById('announcementInput').value; if(t) { await db.collection("announcements").add({text: t, date: new Date()}); showToast("Broadcasted"); document.getElementById('announcementInput').value = ""; } }
 
         async function deleteItem(coll, id) {
             const modal = document.createElement('div');
             modal.className = "fixed inset-0 bg-black/90 flex items-center justify-center z-[200] p-6";
-            modal.innerHTML = `
-                <div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] text-center max-w-sm">
-                    <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl"><i class="fas fa-exclamation-triangle"></i></div>
-                    <h3 class="text-2xl font-black mb-2 italic">Confirm Delete?</h3>
-                    <p class="text-slate-500 mb-8 font-medium">This entry will be permanently removed from the cloud database.</p>
-                    <div class="flex gap-4">
-                        <button id="cncl" class="flex-1 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold">Back</button>
-                        <button id="conf" class="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold shadow-lg">Confirm</button>
-                    </div>
-                </div>`;
+            modal.innerHTML = `<div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] text-center max-w-sm"><div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl"><i class="fas fa-exclamation-triangle"></i></div><h3 class="text-2xl font-black mb-2 italic">Delete?</h3><p class="text-slate-500 mb-8 font-medium">Permanently remove this entry?</p><div class="flex gap-4"><button id="cncl" class="flex-1 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold">Back</button><button id="conf" class="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold">Confirm</button></div></div>`;
             document.body.appendChild(modal);
             document.getElementById('cncl').onclick = () => modal.remove();
-            document.getElementById('conf').onclick = async () => {
-                await db.collection(coll).doc(id).delete();
-                modal.remove();
-                showToast("Item Erased");
-            };
+            document.getElementById('conf').onclick = async () => { await db.collection(coll).doc(id).delete(); modal.remove(); showToast("Erased"); };
         }
 
         function showToast(msg) {
-            const toast = document.createElement('div');
-            toast.className = "fixed bottom-10 left-1/2 -translate-x-1/2 gradient-btn text-white px-10 py-4 rounded-[2rem] shadow-2xl z-[200] font-black text-xs uppercase tracking-widest animate-pop";
-            toast.innerHTML = `<i class="fas fa-circle-check mr-3"></i> ${msg}`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateY(20px) translateX(-50%)';
-                setTimeout(() => toast.remove(), 400);
-            }, 3000);
+            const t = document.createElement('div');
+            t.className = "fixed bottom-10 left-1/2 -translate-x-1/2 gradient-btn text-white px-10 py-4 rounded-[2rem] shadow-2xl z-[200] font-black text-xs uppercase tracking-widest animate-pop";
+            t.innerHTML = `<i class="fas fa-circle-check mr-3"></i> ${msg}`;
+            document.body.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px) translateX(-50%)'; setTimeout(() => t.remove(), 400); }, 3000);
         }
 
-        window.onload = () => {
-            const savedTheme = localStorage.getItem('pg_ultimate_theme') || 'light';
-            setTheme(savedTheme);
-            initApp();
-        };
+        window.onload = () => { setTheme(localStorage.getItem('pg_ultimate_theme') || 'light'); initApp(); };
     </script>
 </body>
 </html>
