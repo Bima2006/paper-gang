@@ -90,25 +90,27 @@
             z-index: 40;
         }
 
-        /* --- MOBILE SIDEBAR ANIMATION --- */
-        #sidebar-overlay {
-            transition: opacity 0.3s ease;
-        }
-        #main-sidebar {
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        #sidebar-overlay { transition: opacity 0.3s ease; }
+        #main-sidebar { transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         @media (max-width: 1024px) {
-            #main-sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100vh;
-                z-index: 150;
-                transform: translateX(-100%);
-            }
-            #main-sidebar.open {
-                transform: translateX(0);
-            }
+            #main-sidebar { position: fixed; top: 0; left: 0; height: 100vh; z-index: 150; transform: translateX(-100%); }
+            #main-sidebar.open { transform: translateX(0); }
+        }
+
+        .tg-container {
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+        }
+
+        .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes pop {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -133,7 +135,7 @@
                     <i class="fas fa-bars-staggered"></i>
                 </button>
                 
-                <div onclick="toggleSidebar()" class="cursor-pointer flex items-center gap-3 lg:gap-4">
+                <div onclick="showLibrary()" class="cursor-pointer flex items-center gap-3 lg:gap-4">
                     <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-gradient-to-tr from-violet-600 to-pink-500 text-white flex items-center justify-center shadow-lg shadow-violet-500/20 rotate-3">
                         <i class="fas fa-bolt-lightning text-lg lg:text-xl"></i>
                     </div>
@@ -161,23 +163,36 @@
         </header>
 
         <div class="flex flex-1 overflow-hidden">
-            <aside id="main-sidebar" class="w-80 sidebar-bg flex flex-col p-8 overflow-y-auto">
+            <aside id="main-sidebar" class="w-80 sidebar-bg flex flex-col p-8 overflow-y-auto no-scrollbar">
                 <button onclick="toggleSidebar()" class="lg:hidden self-end mb-6 text-slate-400 text-2xl">&times;</button>
+
+                <!-- FEEDS SECTION (NEW) -->
+                <div class="mb-10">
+                    <h3 class="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-sky-500"></span> Updates & Feeds
+                    </h3>
+                    <nav class="space-y-1">
+                        <button onclick="showTelegramFeed()" id="side-telegram" class="sidebar-item w-full text-left p-4 flex items-center text-slate-500">
+                            <span class="text-sm font-bold"><i class="fab fa-telegram-plane mr-3 text-sky-500"></i>Telegram Feed</span>
+                        </button>
+                        <button onclick="showEduFeed()" id="side-edufeed" class="sidebar-item w-full text-left p-4 flex items-center text-slate-500">
+                            <span class="text-sm font-bold"><i class="fas fa-graduation-cap mr-3 text-indigo-500"></i>Edu Feed</span>
+                        </button>
+                    </nav>
+                </div>
 
                 <div class="mb-10">
                     <h3 class="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-violet-500"></span> Knowledge Folders
                     </h3>
-                    <nav id="subjectList" class="space-y-1">
-                        </nav>
+                    <nav id="subjectList" class="space-y-1"></nav>
                 </div>
 
                 <div class="mb-10">
                     <h3 class="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-pink-500"></span> EDU LINKS
                     </h3>
-                    <div id="eduLinksList" class="space-y-2">
-                        </div>
+                    <div id="eduLinksList" class="space-y-2"></div>
                 </div>
 
                 <div class="mt-auto">
@@ -196,24 +211,23 @@
                     <div id="activeTabs" class="flex gap-2"></div>
                 </div>
 
-                <div id="mainDisplay" class="flex-1 p-4 lg:p-8 overflow-y-auto">
-                    <div id="libraryView" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8">
-                        </div>
+                <div id="mainDisplay" class="flex-1 p-4 lg:p-8 overflow-y-auto no-scrollbar">
+                    <div id="libraryView" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 lg:gap-8"></div>
+
+                    <!-- Telegram Feed -->
+                    <div id="telegramFeedView" class="hidden max-w-4xl mx-auto space-y-8 py-8"></div>
+
+                    <!-- Edu Feed -->
+                    <div id="eduFeedView" class="hidden max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 py-8"></div>
                     
                     <div id="readerView" class="hidden h-full">
                         <div class="bg-white dark:bg-slate-900 p-1 lg:p-2 rounded-[1.5rem] lg:rounded-[2.5rem] shadow-2xl h-full border-2 lg:border-4 border-violet-500/20 relative">
                             <div class="iframe-container">
                                 <iframe id="pdfFrame" src=""></iframe>
                                 <div class="zoom-controls">
-                                    <button onclick="zoomPdf(0.1)" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-violet-600 flex items-center justify-center hover:scale-110 transition-transform">
-                                        <i class="fas fa-magnifying-glass-plus"></i>
-                                    </button>
-                                    <button onclick="zoomPdf(-0.1)" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-pink-600 flex items-center justify-center hover:scale-110 transition-transform">
-                                        <i class="fas fa-magnifying-glass-minus"></i>
-                                    </button>
-                                    <button onclick="resetZoom()" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-slate-600 flex items-center justify-center hover:scale-110 transition-transform">
-                                        <i class="fas fa-arrows-rotate"></i>
-                                    </button>
+                                    <button onclick="zoomPdf(0.1)" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-violet-600 flex items-center justify-center hover:scale-110 transition-transform"><i class="fas fa-magnifying-glass-plus"></i></button>
+                                    <button onclick="zoomPdf(-0.1)" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-pink-600 flex items-center justify-center hover:scale-110 transition-transform"><i class="fas fa-magnifying-glass-minus"></i></button>
+                                    <button onclick="resetZoom()" class="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-white shadow-xl text-slate-600 flex items-center justify-center hover:scale-110 transition-transform"><i class="fas fa-arrows-rotate"></i></button>
                                 </div>
                             </div>
                         </div>
@@ -229,33 +243,34 @@
         </footer>
     </div>
 
-    <div id="adminOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-xl hidden z-[100] items-center justify-center p-6">
+    <!-- Admin Overlay -->
+    <div id="adminOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-xl hidden z-[200] items-center justify-center p-6">
         <div class="bg-white dark:bg-slate-950 w-full max-w-2xl rounded-[3rem] shadow-[0_0_100px_rgba(139,92,246,0.3)] overflow-hidden border border-violet-500/30 flex flex-col max-h-[90vh]">
             <div class="p-8 border-b border-slate-100 dark:border-slate-900 flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center text-xl shadow-lg">
-                        <i class="fas fa-fingerprint"></i>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-black text-white flex items-center justify-center text-xl shadow-lg"><i class="fas fa-fingerprint"></i></div>
                     <h2 class="text-2xl font-black italic">CONTROL <span class="gradient-text">CENTRE</span></h2>
                 </div>
                 <button onclick="closeAdmin()" class="text-3xl font-light hover:rotate-90 transition-transform">&times;</button>
             </div>
 
             <div id="adminLogin" class="p-8 lg:p-12 text-center">
-                <p class="text-slate-500 mb-8 font-bold uppercase tracking-widest text-xs">Verify Credentials</p>
                 <input type="password" id="adminKey" placeholder="••••" class="w-full text-center text-3xl lg:text-5xl tracking-[0.5em] p-6 bg-slate-50 dark:bg-slate-900 rounded-[2rem] border-none outline-none mb-8">
                 <button onclick="authAdmin()" class="w-full gradient-btn text-white py-6 rounded-[2rem] font-black uppercase tracking-[0.2em] text-lg">Access Database</button>
             </div>
 
-            <div id="adminConsole" class="hidden p-6 lg:p-8 space-y-6 overflow-y-auto">
+            <div id="adminConsole" class="hidden p-6 lg:p-8 space-y-6 overflow-y-auto no-scrollbar">
+                <!-- Subject -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
-                    <label class="text-[10px] font-black text-violet-500 uppercase mb-4 block">Categories / Subjects</label>
+                    <label class="text-[10px] font-black text-violet-500 uppercase mb-4 block">Categories</label>
                     <div class="flex gap-3 mb-4">
                         <input type="text" id="subInput" placeholder="Subject Name..." class="flex-1 p-4 rounded-2xl dark:bg-slate-800 outline-none">
-                        <button onclick="saveSubject()" class="bg-violet-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button>
+                        <button onclick="saveSubject()" class="bg-violet-600 text-white w-14 h-14 rounded-2xl flex items-center justify-center"><i class="fas fa-plus"></i></button>
                     </div>
                     <div id="adminSubjectList" class="flex flex-wrap gap-2"></div>
                 </div>
+
+                <!-- Paper -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
                     <label class="text-[10px] font-black text-pink-500 uppercase mb-4 block">Store New Paper</label>
                     <div class="space-y-3">
@@ -265,6 +280,29 @@
                         <button onclick="savePDF()" class="w-full gradient-btn text-white py-4 rounded-2xl font-black uppercase tracking-widest">Store in Cloud</button>
                     </div>
                 </div>
+
+                <!-- Edu Feed Section (NEW) -->
+                <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
+                    <label class="text-[10px] font-black text-indigo-500 uppercase mb-4 block">Add Edu Feed Post</label>
+                    <div class="space-y-3">
+                        <input type="text" id="eduFeedTitle" placeholder="Post Title" class="w-full p-4 rounded-2xl dark:bg-slate-800 outline-none">
+                        <input type="text" id="eduFeedImg" placeholder="Image URL" class="w-full p-4 rounded-2xl dark:bg-slate-800 outline-none">
+                        <button onclick="saveEduFeed()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest">Add Edu Post</button>
+                    </div>
+                    <div id="adminEduFeedList" class="mt-4 space-y-2"></div>
+                </div>
+
+                <!-- Telegram Feed Section -->
+                <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
+                    <label class="text-[10px] font-black text-sky-500 uppercase mb-4 block">Add Telegram Post (Embed)</label>
+                    <div class="space-y-3">
+                        <textarea id="tgEmbedInput" placeholder="Paste Embed Code here..." class="w-full p-4 h-32 rounded-2xl dark:bg-slate-800 outline-none resize-none text-xs font-mono"></textarea>
+                        <button onclick="saveTelegramPost()" class="w-full bg-sky-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest">Add Telegram Post</button>
+                    </div>
+                    <div id="adminTelegramList" class="mt-4 space-y-2"></div>
+                </div>
+
+                <!-- EDU Links -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
                     <label class="text-[10px] font-black text-cyan-500 uppercase mb-4 block">EDU LINKS</label>
                     <div class="space-y-3">
@@ -275,10 +313,12 @@
                             <option value="telegram">Telegram Message</option>
                             <option value="video">Video Link</option>
                         </select>
-                        <button onclick="saveEduLink()" class="w-full bg-cyan-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg">Add Link</button>
+                        <button onclick="saveEduLink()" class="w-full bg-cyan-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest">Add Link</button>
                     </div>
                     <div id="adminLinksList" class="mt-4 space-y-2"></div>
                 </div>
+
+                <!-- Broadcast -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
                     <label class="text-[10px] font-black text-amber-500 uppercase mb-4 block">Broadcast</label>
                     <div class="flex gap-3 mb-4">
@@ -308,8 +348,8 @@
         let currentCategory = "";
         let openTabs = [];
         let currentZoom = 1;
+        let isAdminLoggedIn = false;
 
-        // --- SIDEBAR TOGGLE ---
         function toggleSidebar() {
             const sidebar = document.getElementById('main-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -317,12 +357,10 @@
             overlay.classList.toggle('hidden');
         }
 
-        // --- THEME ENGINE ---
         function setTheme(theme) {
             const body = document.body;
             const lBtn = document.getElementById('lightBtn');
             const dBtn = document.getElementById('darkBtn');
-
             if(theme === 'dark') {
                 body.className = 'dark-theme';
                 dBtn.className = 'w-8 h-8 lg:w-10 lg:h-10 rounded-xl flex items-center justify-center bg-slate-800 shadow-lg text-white';
@@ -350,23 +388,22 @@
         function initApp() {
             document.getElementById('status-bar').classList.remove('hidden');
             
+            // Subjects
             db.collection("subjects").orderBy("name").onSnapshot(snap => {
                 const list = document.getElementById('subjectList');
                 const select = document.getElementById('subSelect');
                 const adminList = document.getElementById('adminSubjectList');
                 list.innerHTML = ""; select.innerHTML = ""; adminList.innerHTML = "";
-                let first = true;
                 snap.forEach(doc => {
                     const s = doc.data().name; const id = doc.id;
-                    if(first && !currentCategory) { currentCategory = s; first = false; }
                     list.innerHTML += `<button onclick="filter('${s}')" class="sidebar-item w-full text-left p-4 flex items-center justify-between ${currentCategory === s ? 'active' : 'text-slate-500'}"><span class="text-sm font-bold"><i class="fas fa-folder-closed mr-3 opacity-40"></i>${s}</span></button>`;
                     select.innerHTML += `<option value="${s}">${s}</option>`;
                     adminList.innerHTML += `<div class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 font-bold text-xs">${s} <button onclick="deleteItem('subjects', '${id}')" class="text-red-500 ml-2"><i class="fas fa-times"></i></button></div>`;
                 });
-                filter(currentCategory);
                 document.getElementById('status-bar').classList.add('hidden');
             });
 
+            // Edu Links
             db.collection("edu_links").orderBy("date", "desc").onSnapshot(snap => {
                 const list = document.getElementById('eduLinksList');
                 const adminList = document.getElementById('adminLinksList');
@@ -377,14 +414,15 @@
                     if(l.type === 'telegram') { icon = "fa-paper-plane"; color = "text-sky-500"; }
                     if(l.type === 'video') { icon = "fa-circle-play"; color = "text-rose-500"; }
                     list.innerHTML += `<a href="${l.url}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-500/10 transition-all text-xs font-bold text-slate-500 hover:text-slate-800 dark:hover:text-white"><i class="fas ${icon} ${color} text-[14px]"></i> ${l.name}</a>`;
-                    adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700"><div class="text-xs font-bold"><i class="fas ${icon} mr-2"></i> ${l.name}</div><button onclick="deleteItem('edu_links', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
+                    adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl"><div class="text-xs font-bold">${l.name}</div><button onclick="deleteItem('edu_links', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
                 });
             });
 
+            // Announcements
             db.collection("announcements").orderBy("date", "desc").onSnapshot(snap => {
                 const bar = document.getElementById('announcement-content');
                 const adminList = document.getElementById('adminAnnouncementList');
-                let text = "Welcome to Paper Gang Pro! Stay focused and keep studying. ";
+                let text = "Welcome to Paper Gang Pro! Stay focused. ";
                 adminList.innerHTML = "";
                 snap.forEach(doc => {
                     const a = doc.data(); const id = doc.id;
@@ -392,6 +430,47 @@
                     adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl"><div class="text-xs font-medium">${a.text}</div><button onclick="deleteItem('announcements', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
                 });
                 bar.innerHTML = text;
+            });
+
+            // Telegram Feed
+            db.collection("telegram_posts").orderBy("date", "desc").onSnapshot(snap => {
+                const feed = document.getElementById('telegramFeedView');
+                const adminList = document.getElementById('adminTelegramList');
+                feed.innerHTML = ""; adminList.innerHTML = "";
+                snap.forEach(doc => {
+                    const p = doc.data(); const id = doc.id;
+                    const postDiv = document.createElement('div');
+                    postDiv.className = "tg-container animate-pop shadow-2xl mb-8";
+                    postDiv.innerHTML = p.embedCode;
+                    feed.appendChild(postDiv);
+                    adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl"><div class="text-[10px] truncate max-w-[200px]">${p.embedCode}</div><button onclick="deleteItem('telegram_posts', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
+                    const scriptTags = postDiv.getElementsByTagName('script');
+                    for (let s of scriptTags) {
+                        const ns = document.createElement('script');
+                        Array.from(s.attributes).forEach(a => ns.setAttribute(a.name, a.value));
+                        s.parentNode.replaceChild(ns, s);
+                    }
+                });
+            });
+
+            // Edu Feed (NEW)
+            db.collection("edu_feed").orderBy("date", "desc").onSnapshot(snap => {
+                const feed = document.getElementById('eduFeedView');
+                const adminList = document.getElementById('adminEduFeedList');
+                feed.innerHTML = ""; adminList.innerHTML = "";
+                snap.forEach(doc => {
+                    const p = doc.data(); const id = doc.id;
+                    feed.innerHTML += `
+                        <div class="premium-card overflow-hidden animate-pop">
+                            <img src="${p.image}" class="w-full h-64 object-cover" onerror="this.src='https://placehold.co/600x400/8b5cf6/ffffff?text=Edu+Feed'">
+                            <div class="p-6">
+                                <h4 class="font-black text-xl mb-2">${p.title}</h4>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${new Date(p.date.toDate()).toLocaleDateString()}</p>
+                            </div>
+                        </div>`;
+                    adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl"><div class="text-xs font-bold">${p.title}</div><button onclick="deleteItem('edu_feed', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
+                });
+                if(feed.innerHTML === "") feed.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold italic">No Edu Feed updates.</div>`;
             });
 
             loadPapers();
@@ -403,7 +482,7 @@
                 container.innerHTML = "";
                 snap.forEach(doc => {
                     const p = doc.data(); const id = doc.id;
-                    if(p.category === currentCategory) {
+                    if(p.category === currentCategory || !currentCategory) {
                         container.innerHTML += `
                             <div class="premium-card p-6 lg:p-8 relative animate-pop">
                                 <div class="flex flex-col h-full cursor-pointer" onclick="openTab('${p.title}', '${p.link}')">
@@ -413,18 +492,53 @@
                                     <h4 class="font-extrabold text-lg lg:text-xl leading-tight mb-2">${p.title}</h4>
                                     <div class="flex items-center gap-2 mt-auto"><span class="px-3 py-1 rounded-full bg-violet-500/10 text-[9px] font-black text-violet-500 uppercase tracking-widest">${p.category}</span></div>
                                 </div>
-                                <button onclick="event.stopPropagation(); deleteItem('pdfs', '${id}')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 transition-colors"><i class="fas fa-trash-can"></i></button>
+                                ${isAdminLoggedIn ? `<button onclick="event.stopPropagation(); deleteItem('pdfs', '${id}')" class="absolute top-6 right-6 text-slate-300 hover:text-red-500 transition-colors"><i class="fas fa-trash-can"></i></button>` : ''}
                             </div>`;
                     }
                 });
-                if(container.innerHTML === "") container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold italic">No papers available yet.</div>`;
+                if(container.innerHTML === "") container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold italic">No papers in this category.</div>`;
             });
         }
 
         function filter(cat) { 
             currentCategory = cat; showLibrary(); loadPapers();
-            if(window.innerWidth < 1024) toggleSidebar(); // Close sidebar on mobile after selection
+            if(window.innerWidth < 1024) toggleSidebar();
             document.querySelectorAll('.sidebar-item').forEach(el => { el.classList.remove('active'); if(el.innerText.includes(cat)) el.classList.add('active'); });
+        }
+
+        function showLibrary() {
+            resetMenuStyles();
+            document.getElementById('tab-home').classList.add('tab-active');
+            document.getElementById('libraryView').classList.remove('hidden');
+            document.getElementById('telegramFeedView').classList.add('hidden');
+            document.getElementById('eduFeedView').classList.add('hidden');
+            document.getElementById('readerView').classList.add('hidden');
+            document.getElementById('pdfFrame').src = ""; renderTabs();
+        }
+
+        function showTelegramFeed() {
+            resetMenuStyles();
+            document.getElementById('side-telegram').classList.add('active');
+            document.getElementById('libraryView').classList.add('hidden');
+            document.getElementById('telegramFeedView').classList.remove('hidden');
+            document.getElementById('eduFeedView').classList.add('hidden');
+            document.getElementById('readerView').classList.add('hidden');
+            if(window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function showEduFeed() {
+            resetMenuStyles();
+            document.getElementById('side-edufeed').classList.add('active');
+            document.getElementById('libraryView').classList.add('hidden');
+            document.getElementById('telegramFeedView').classList.add('hidden');
+            document.getElementById('eduFeedView').classList.remove('hidden');
+            document.getElementById('readerView').classList.add('hidden');
+            if(window.innerWidth < 1024) toggleSidebar();
+        }
+
+        function resetMenuStyles() {
+            document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('tab-active'));
         }
 
         function openTab(title, link) {
@@ -443,17 +557,12 @@
         }
 
         function switchTab(url) {
-            document.getElementById('tab-home').classList.remove('tab-active');
+            resetMenuStyles();
             document.getElementById('libraryView').classList.add('hidden');
+            document.getElementById('telegramFeedView').classList.add('hidden');
+            document.getElementById('eduFeedView').classList.add('hidden');
             document.getElementById('readerView').classList.remove('hidden');
             document.getElementById('pdfFrame').src = url; resetZoom(); renderTabs();
-        }
-
-        function showLibrary() {
-            document.getElementById('tab-home').classList.add('tab-active');
-            document.getElementById('libraryView').classList.remove('hidden');
-            document.getElementById('readerView').classList.add('hidden');
-            document.getElementById('pdfFrame').src = ""; renderTabs();
         }
 
         function closeTab(url) {
@@ -463,12 +572,28 @@
 
         function openAdmin() { document.getElementById('adminOverlay').style.display = 'flex'; }
         function closeAdmin() { document.getElementById('adminOverlay').style.display = 'none'; }
-        function authAdmin() { if(document.getElementById('adminKey').value === ADMIN_PWD) { document.getElementById('adminLogin').classList.add('hidden'); document.getElementById('adminConsole').classList.remove('hidden'); } else showToast("Invalid Key"); }
+        
+        function authAdmin() { 
+            if(document.getElementById('adminKey').value === ADMIN_PWD) { 
+                isAdminLoggedIn = true;
+                document.getElementById('adminLogin').classList.add('hidden'); 
+                document.getElementById('adminConsole').classList.remove('hidden'); 
+                loadPapers();
+            } else { showToast("Invalid Key"); }
+        }
 
-        async function saveSubject() { const n = document.getElementById('subInput').value; if(n) { await db.collection("subjects").add({name: n}); document.getElementById('subInput').value = ""; showToast("Subject Added"); } }
+        async function saveSubject() { const n = document.getElementById('subInput').value; if(n) { await db.collection("subjects").add({name: n}); document.getElementById('subInput').value = ""; showToast("Added"); } }
         async function savePDF() {
             const t = document.getElementById('pdfName').value; const l = document.getElementById('pdfLink').value; const c = document.getElementById('subSelect').value;
-            if(t && l && c) { await db.collection("pdfs").add({title: t, link: l, category: c, date: new Date()}); showToast("PDF Stored"); document.getElementById('pdfName').value = ""; document.getElementById('pdfLink').value = ""; }
+            if(t && l && c) { await db.collection("pdfs").add({title: t, link: l, category: c, date: new Date()}); showToast("Stored"); document.getElementById('pdfName').value = ""; document.getElementById('pdfLink').value = ""; }
+        }
+        async function saveEduFeed() {
+            const t = document.getElementById('eduFeedTitle').value; const i = document.getElementById('eduFeedImg').value;
+            if(t && i) { await db.collection("edu_feed").add({title: t, image: i, date: new Date()}); showToast("Edu Post Added"); document.getElementById('eduFeedTitle').value = ""; document.getElementById('eduFeedImg').value = ""; }
+        }
+        async function saveTelegramPost() {
+            const code = document.getElementById('tgEmbedInput').value;
+            if(code.trim()) { await db.collection("telegram_posts").add({embedCode: code, date: new Date()}); showToast("Telegram Post Linked"); document.getElementById('tgEmbedInput').value = ""; }
         }
         async function saveEduLink() {
             const n = document.getElementById('linkName').value; const u = document.getElementById('linkUrl').value; const t = document.getElementById('linkType').value;
@@ -478,8 +603,8 @@
 
         async function deleteItem(coll, id) {
             const modal = document.createElement('div');
-            modal.className = "fixed inset-0 bg-black/90 flex items-center justify-center z-[200] p-6";
-            modal.innerHTML = `<div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] text-center max-w-sm"><div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl"><i class="fas fa-exclamation-triangle"></i></div><h3 class="text-2xl font-black mb-2 italic">Delete?</h3><p class="text-slate-500 mb-8 font-medium">Permanently remove this entry?</p><div class="flex gap-4"><button id="cncl" class="flex-1 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold">Back</button><button id="conf" class="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold">Confirm</button></div></div>`;
+            modal.className = "fixed inset-0 bg-black/90 flex items-center justify-center z-[300] p-6";
+            modal.innerHTML = `<div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] text-center max-w-sm"><h3 class="text-2xl font-black mb-2 italic">Delete?</h3><div class="flex gap-4 mt-8"><button id="cncl" class="flex-1 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold">Back</button><button id="conf" class="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold">Confirm</button></div></div>`;
             document.body.appendChild(modal);
             document.getElementById('cncl').onclick = () => modal.remove();
             document.getElementById('conf').onclick = async () => { await db.collection(coll).doc(id).delete(); modal.remove(); showToast("Erased"); };
@@ -487,7 +612,7 @@
 
         function showToast(msg) {
             const t = document.createElement('div');
-            t.className = "fixed bottom-10 left-1/2 -translate-x-1/2 gradient-btn text-white px-10 py-4 rounded-[2rem] shadow-2xl z-[200] font-black text-xs uppercase tracking-widest animate-pop";
+            t.className = "fixed bottom-10 left-1/2 -translate-x-1/2 gradient-btn text-white px-10 py-4 rounded-[2rem] shadow-2xl z-[400] font-black text-xs uppercase tracking-widest animate-pop text-center";
             t.innerHTML = `<i class="fas fa-circle-check mr-3"></i> ${msg}`;
             document.body.appendChild(t);
             setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(20px) translateX(-50%)'; setTimeout(() => t.remove(), 400); }, 3000);
