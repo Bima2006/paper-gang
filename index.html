@@ -39,7 +39,7 @@
         .gradient-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); }
 
         .premium-card { transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1); border-radius: 24px; }
-        .premium-card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.3); }
+        .premium-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 15px 30px -10px rgba(139, 92, 246, 0.2); }
 
         .tab-btn { position: relative; transition: all 0.3s ease; }
         .tab-btn::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 4px; background: linear-gradient(to right, var(--primary), var(--secondary)); transition: all 0.3s ease; transform: translateX(-50%); border-radius: 10px; }
@@ -107,14 +107,46 @@
             padding: 10px;
         }
 
+        /* Edu Feed Fix: Ensure full image is visible */
+        .edu-card-img {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            object-fit: contain; /* Full image visible */
+            background: #111; /* Background for images with different ratios */
+        }
+
         .animate-pop { animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes pop {
             0% { transform: scale(0.9); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        /* Image Modal */
+        #imgModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 300;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        #imgModal img {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body class="light-theme">
+
+    <!-- Image Modal for Full View -->
+    <div id="imgModal" onclick="this.style.display='none'">
+        <img id="fullImg" src="" alt="Full Preview">
+        <button class="absolute top-10 right-10 text-white text-4xl">&times;</button>
+    </div>
 
     <div id="status-bar" class="fixed top-0 left-0 w-full bg-gradient-to-r from-violet-600 to-pink-600 text-white text-[10px] py-1 text-center font-black uppercase tracking-[0.3em] z-[100] hidden">
         Synchronizing Cloud Database...
@@ -166,7 +198,7 @@
             <aside id="main-sidebar" class="w-80 sidebar-bg flex flex-col p-8 overflow-y-auto no-scrollbar">
                 <button onclick="toggleSidebar()" class="lg:hidden self-end mb-6 text-slate-400 text-2xl">&times;</button>
 
-                <!-- FEEDS SECTION (NEW) -->
+                <!-- FEEDS SECTION -->
                 <div class="mb-10">
                     <h3 class="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
                         <span class="w-2 h-2 rounded-full bg-sky-500"></span> Updates & Feeds
@@ -218,7 +250,7 @@
                     <div id="telegramFeedView" class="hidden max-w-4xl mx-auto space-y-8 py-8"></div>
 
                     <!-- Edu Feed -->
-                    <div id="eduFeedView" class="hidden max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 py-8"></div>
+                    <div id="eduFeedView" class="hidden max-w-4xl mx-auto space-y-10 py-8"></div>
                     
                     <div id="readerView" class="hidden h-full">
                         <div class="bg-white dark:bg-slate-900 p-1 lg:p-2 rounded-[1.5rem] lg:rounded-[2.5rem] shadow-2xl h-full border-2 lg:border-4 border-violet-500/20 relative">
@@ -281,7 +313,7 @@
                     </div>
                 </div>
 
-                <!-- Edu Feed Section (NEW) -->
+                <!-- Edu Feed Section -->
                 <div class="bg-slate-50 dark:bg-slate-900 p-6 rounded-[2rem]">
                     <label class="text-[10px] font-black text-indigo-500 uppercase mb-4 block">Add Edu Feed Post</label>
                     <div class="space-y-3">
@@ -453,7 +485,7 @@
                 });
             });
 
-            // Edu Feed (NEW)
+            // Edu Feed
             db.collection("edu_feed").orderBy("date", "desc").onSnapshot(snap => {
                 const feed = document.getElementById('eduFeedView');
                 const adminList = document.getElementById('adminEduFeedList');
@@ -462,15 +494,24 @@
                     const p = doc.data(); const id = doc.id;
                     feed.innerHTML += `
                         <div class="premium-card overflow-hidden animate-pop">
-                            <img src="${p.image}" class="w-full h-64 object-cover" onerror="this.src='https://placehold.co/600x400/8b5cf6/ffffff?text=Edu+Feed'">
-                            <div class="p-6">
-                                <h4 class="font-black text-xl mb-2">${p.title}</h4>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${new Date(p.date.toDate()).toLocaleDateString()}</p>
+                            <div class="p-6 lg:p-8">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="font-black text-xl lg:text-2xl gradient-text">${p.title}</h4>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${new Date(p.date.toDate()).toLocaleDateString()}</p>
+                                </div>
+                                <div class="rounded-3xl overflow-hidden bg-black/5 dark:bg-white/5 border border-slate-100 dark:border-slate-800 cursor-zoom-in" onclick="viewImage('${p.image}')">
+                                    <img src="${p.image}" class="edu-card-img" onerror="this.src='https://placehold.co/800x600/8b5cf6/ffffff?text=Image+Not+Found'">
+                                </div>
+                                <div class="mt-4 text-center">
+                                    <button onclick="viewImage('${p.image}')" class="text-[10px] font-black uppercase tracking-widest text-violet-500 hover:underline">
+                                        <i class="fas fa-expand-alt mr-2"></i> View Full Image
+                                    </button>
+                                </div>
                             </div>
                         </div>`;
                     adminList.innerHTML += `<div class="flex justify-between items-center p-3 bg-white dark:bg-slate-800 rounded-xl"><div class="text-xs font-bold">${p.title}</div><button onclick="deleteItem('edu_feed', '${id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div>`;
                 });
-                if(feed.innerHTML === "") feed.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold italic">No Edu Feed updates.</div>`;
+                if(feed.innerHTML === "") feed.innerHTML = `<div class="py-20 text-center text-slate-400 font-bold italic">No Edu Feed updates.</div>`;
             });
 
             loadPapers();
@@ -498,6 +539,11 @@
                 });
                 if(container.innerHTML === "") container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold italic">No papers in this category.</div>`;
             });
+        }
+
+        function viewImage(src) {
+            document.getElementById('fullImg').src = src;
+            document.getElementById('imgModal').style.display = 'flex';
         }
 
         function filter(cat) { 
@@ -604,7 +650,7 @@
         async function deleteItem(coll, id) {
             const modal = document.createElement('div');
             modal.className = "fixed inset-0 bg-black/90 flex items-center justify-center z-[300] p-6";
-            modal.innerHTML = `<div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] text-center max-w-sm"><h3 class="text-2xl font-black mb-2 italic">Delete?</h3><div class="flex gap-4 mt-8"><button id="cncl" class="flex-1 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold">Back</button><button id="conf" class="flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold">Confirm</button></div></div>`;
+            modal.innerHTML = `<div class="bg-white dark:bg-slate-900 p-10 rounded-[3rem] text-center max-w-sm"><h3 class="text-2xl font-black mb-2 italic">Delete?</h3><div class="flex gap-4 mt-8"><button id=\"cncl\" class=\"flex-1 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 font-bold\">Back</button><button id=\"conf\" class=\"flex-1 py-4 rounded-2xl bg-red-600 text-white font-bold\">Confirm</button></div></div>`;
             document.body.appendChild(modal);
             document.getElementById('cncl').onclick = () => modal.remove();
             document.getElementById('conf').onclick = async () => { await db.collection(coll).doc(id).delete(); modal.remove(); showToast("Erased"); };
